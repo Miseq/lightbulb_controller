@@ -8,10 +8,9 @@ def main():
     client.connect(broker)
     client.loop_start()
     client.subscribe("id")
-    time.sleep(2)
+    client.publish("command-all", "1")
+    print("@")
 
-    client.loop_stop()
-    client.disconnect()
 
 if __name__ == '__main__':
     main()

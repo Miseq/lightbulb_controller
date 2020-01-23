@@ -1,6 +1,9 @@
 from lightbulbs.lightbulb_mqtt_client import LightBulbMQTTClient
 import main
+import sys
 import paho.mqtt.client as mqtt
+from _thread import start_new_thread
+import threading
 import time
 
 class LightBulb(mqtt.Client):
@@ -23,39 +26,29 @@ class LightBulb(mqtt.Client):
             raise ValueError("Wrong input, correct values are 0 for OFF and 1 for ON!")
         self._stan = new_stan
 
-    def connect_to_broker(self):
-        if self.is_connected():
-            return  # jeśli jest już połączony to opuszczamy metodę
-        self.connect(self.broker_address)
-        self.loop_start()
-        self.subscribe(f"command-{self.id}")
-        self.publish("activation", self.id)
-        self.publish(f"status-{self.id}", f'{self.stan}')
-        self.publish(f"command-{self.id}", f'{self.stan}')
-        self.loop_stop()
+    def show_current_status(self):
+        print(f"Status of lightbulb {self.id}", end="")
+        while True:
+            current_status = 'ON' if self.stan==1 else 'OFF'
+            print(f"{current_status}")
 
     def change_status(self, new_status):
-        if not self.is_connected():
-            self.reconnect()
-            self.stan = new_status
-            self.loop_start()
-            self.publish(f"status-{self.id}", f'{self.stan}')
-            self.loop_stop()
+        self.stan = new_status
+        self.publish(f"status-{self.id}", f'{self.stan}')
 
     def end_connection(self):
-        self.loop_start()
         self.publish("deactivation", self.id)
-        self.loop_stop()
         self.disconnect()
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         m_decode = str(msg.payload.decode("utf-8","ignore"))
-        if topic == f"command-{client.id}":
-            if m_decode == "ON" or m_decode == 1:
-                self.stan = 1
-            elif m_decode == "OFF" or m_decode == 0:
-                self.stan = 0
+        print("topic")
+        if topic == f"command-{client.id}" or topic == "command-all":
+            if m_decode == "ON" or m_decode == '1':
+                self.change_status(1)
+            elif m_decode == "OFF" or m_decode == '0':
+                self.change_status(0)
             print(f"Status set to: {self.stan}")
         else:
             print(f"message from topic - {topic}\nMessage: {m_decode}")
@@ -65,21 +58,29 @@ class LightBulb(mqtt.Client):
         pass
 
     def on_connect(self, client, userdata, flags, rc):
-        if rc==0:
-            print("Connected")
-        else:
-            print("Couldn't connect to broker!")
+        print("Subscribing")
+        self.subscribe(f"command-{self.id}")
+        self.subscribe("command-all")
+        self.publish("activation", self.id)
+        self.publish(f"status-{self.id}", f'{self.stan}')
 
-    def on_disconnect(self, client, userdata, flags, rc=0):
-        print(f"Disconnected result code {str(rc)}")
 
 def main(*args, **kwargs):
     broker='localhost'
     client = LightBulb("Alfa")
+    show_status = threading.Thread(target=client.show_current_status())
+    show_status.run()
     print(f"connecting to brokrer {broker}")
-    client.connect_to_broker()
+    client.connect(broker)
+    client.loop_start()
+    while True:
+        if input("DASD") == 0:
+            break
+        print(client.stan)
+    client.loop_stop()
 
-    client.disconnect()
+
+    client.end_connection()
 
 
 if __name__ == '__main__':
