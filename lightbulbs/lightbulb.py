@@ -33,6 +33,7 @@ class LightBulb(mqtt.Client):
     def change_status(self, new_status):
         self.stan = new_status
         self.publish(f"status-{self.id}", f'{self.stan}')
+        print(f"Status changed to: {self.stan}")
 
     def on_disconnect(self):
         self.publish("deactivation", self.id)
@@ -42,13 +43,13 @@ class LightBulb(mqtt.Client):
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         m_decode = str(msg.payload.decode("utf-8","ignore"))
-        print("topic")
+        print("\nMessage from broker recived ", end="")
         if topic == f"command-{client.id}" or topic == "command-all":
             if m_decode == "ON" or m_decode == '1':
                 self.change_status(1)
             elif m_decode == "OFF" or m_decode == '0':
                 self.change_status(0)
-            print(f"Status set to: {self.stan}")
+            print(f"setting status to: {self.stan}")
         else:
             print(f"message from topic - {topic}\nMessage: {m_decode}")
 
@@ -67,23 +68,30 @@ class LightBulb(mqtt.Client):
 def main(*args, **kwargs):
     broker='localhost'
     client = LightBulb("Alfa")
+
     print(f"connecting to brokrer {broker}")
     client.connect(broker)
     client.loop_start()
+
     time.sleep(0.5)
     print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
-    print("To show current status: type 'status', turning on/off type 'on' or 'off', to exit type 'e'")
+    print("To show current status: type 'status', turning on/off type 'on' or 'off', to exit type 'e' ", end="")
+    print("for connection checking: 'connected' or 'c'")
     while True:
         x = input("- ").lower()
         if x == 'status' or x=='s':
             print(client.show_current_status())
-        if x == 'on':
+        elif x == 'on':
             client.change_status(1)
-        if x == 'off':
+        elif x == 'off':
             client.change_status(0)
-        if x == 'exit' or x =='e':
+        elif x == 'exit' or x =='e':
             client.disconnect()
             break
+        elif x == 'connected' or x == 'c':
+            print(f"Connected: {client.is_connected()}")
+        else:
+            print("Command unknow")
     client.loop_stop()
 
 
