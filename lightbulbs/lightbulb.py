@@ -28,15 +28,16 @@ class LightBulb(mqtt.Client):
 
     def show_current_status(self):
         current_status = 'ON' if self.stan==1 else 'OFF'
-        print(f"Status of lightbulb {self.id}:{current_status}")
+        return f"Status:{current_status}"
 
     def change_status(self, new_status):
         self.stan = new_status
         self.publish(f"status-{self.id}", f'{self.stan}')
 
-    def end_connection(self):
+    def on_disconnect(self):
         self.publish("deactivation", self.id)
         self.disconnect()
+        print("Succesfully disconnected")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
@@ -70,19 +71,21 @@ def main(*args, **kwargs):
     client.connect(broker)
     client.loop_start()
     time.sleep(0.5)
+    print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
+    print("To show current status: type 'status', turning on/off type 'on' or 'off', to exit type 'e'")
     while True:
-        x = input("DASD").lower()
-        if x == '0':
-            client.show_current_status()
+        x = input("- ").lower()
+        if x == 'status' or x=='s':
+            print(client.show_current_status())
         if x == 'on':
             client.change_status(1)
         if x == 'off':
             client.change_status(0)
-
+        if x == 'exit' or x =='e':
+            client.disconnect()
+            break
     client.loop_stop()
 
-
-    client.end_connection()
 
 
 if __name__ == '__main__':
