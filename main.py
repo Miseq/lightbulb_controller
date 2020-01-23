@@ -8,7 +8,7 @@ def main():
     client.connect(broker)
     client.loop_start()
     client.subscribe("id")
-    client.publish("command-all", "1")
+    client.publish("command-all", "0")
     print("@")
 
 

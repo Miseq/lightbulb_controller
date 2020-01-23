@@ -27,10 +27,8 @@ class LightBulb(mqtt.Client):
         self._stan = new_stan
 
     def show_current_status(self):
-        print(f"Status of lightbulb {self.id}", end="")
-        while True:
-            current_status = 'ON' if self.stan==1 else 'OFF'
-            print(f"{current_status}")
+        current_status = 'ON' if self.stan==1 else 'OFF'
+        print(f"Status of lightbulb {self.id}:{current_status}")
 
     def change_status(self, new_status):
         self.stan = new_status
@@ -68,15 +66,19 @@ class LightBulb(mqtt.Client):
 def main(*args, **kwargs):
     broker='localhost'
     client = LightBulb("Alfa")
-    show_status = threading.Thread(target=client.show_current_status())
-    show_status.run()
     print(f"connecting to brokrer {broker}")
     client.connect(broker)
     client.loop_start()
+    time.sleep(0.5)
     while True:
-        if input("DASD") == 0:
-            break
-        print(client.stan)
+        x = input("DASD").lower()
+        if x == '0':
+            client.show_current_status()
+        if x == 'on':
+            client.change_status(1)
+        if x == 'off':
+            client.change_status(0)
+
     client.loop_stop()
 
 
