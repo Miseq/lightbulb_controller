@@ -1,14 +1,22 @@
-import paho.mqtt.client as mqtt
+from controller_mqtt_client import ControllerMQTT
 import time
+
 def main():
     broker='localhost'
-    client = mqtt.Client("Controller")
+    controller = ControllerMQTT("Controller")
     print(f"connecting to brokrer {broker}")
 
-    client.connect(broker)
-    client.loop_start()
-    client.subscribe("id")
-    client.publish("command-all", "1")
+    controller.connect(broker)
+    controller.loop_start()
+    controller.subscribe("id")
+    while True:
+        x = input("- ").lower()
+        if x == 'status' or x=='s':
+            print(controller.show_current_status())
+
+
+        elif x == 'connected' or x == 'c':
+            print(f"Connected: {controller.is_connected()}")
     time.sleep(0.5)
     print("@")
 
