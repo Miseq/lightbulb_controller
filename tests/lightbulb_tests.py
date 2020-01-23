@@ -1,5 +1,5 @@
 import unittest
-from lightbulbs.lightbulbs import LightBulb
+from lightbulbs.lightbulb import LightBulb
 
 class MyTestCase(unittest.TestCase):
     def __init__(self):
