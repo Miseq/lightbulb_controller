@@ -9,17 +9,19 @@ def main():
     controller.connect(broker)
     controller.loop_start()
     controller.subscribe("id")
+    time.sleep(0.5)
     while True:
         x = input("- ").lower()
         if x == 'status' or x=='s':
-            print(controller.show_current_status())
-
+            print(controller.dict_of_states)
+            print(controller.connected_lightbulbs_list)
 
         elif x == 'connected' or x == 'c':
             print(f"Connected: {controller.is_connected()}")
-    time.sleep(0.5)
-    print("@")
-
+        elif x == 'exit' or x=='e':
+            break
+    controller.loop_stop()
+    print("naprawde chce ta prace :)")
 
 if __name__ == '__main__':
     main()
