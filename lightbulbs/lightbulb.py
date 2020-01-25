@@ -2,11 +2,11 @@ import paho.mqtt.client as mqtt
 
 
 class LightBulb(mqtt.Client):
-    def __init__(self,id, broker_address='localhost', stan=0):
+    def __init__(self,id, broker='localhost', stan=0):
         super(LightBulb, self).__init__(id)
         self._id = id
         self._stan = stan #0:OFF 1:ON
-        self.broker_address = broker_address
+        self.broker = broker
     @property
     def id(self):
         return self._id
