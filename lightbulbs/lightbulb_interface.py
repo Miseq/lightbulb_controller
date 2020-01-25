@@ -1,14 +1,24 @@
 import time
+import sys
+sys.path.append('../')
 from lightbulbs.lightbulb import LightBulb
+
+
+def connect_to_broker(client, broker):
+    print(f"connecting to brokrer {broker}")
+    try:
+        client.connect(broker)
+        client.loop_start()
+    except:
+        print(f"Cannot connect to broker: {broker}")
 
 def main(*args, **kwargs):
     broker='localhost'
+    #TODO dodac __init__
+    #TODO zrobic sprawdzanie zajetosci ID urzadzenia
     client = LightBulb("Alfa")
 
-    print(f"connecting to brokrer {broker}")
-    client.connect(broker)
-    client.loop_start()
-
+    connect_to_broker(broker, client)
     time.sleep(0.5)
     print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
     print("To show current status: type 'status', turning on/off type 'on' or 'off', to exit type 'e' ", end="")
@@ -27,14 +37,11 @@ def main(*args, **kwargs):
         elif x == 'connected' or x == 'c':
             print(f"Connected: {client.is_connected()}")
         elif x == 'reconnect' or x == 'r':
-            client.reconnect()
-            time.sleep(0.5)
-            print(f"Reconnected: {client.is_connected()}")
+            connect_to_broker(client,broker)
+
         else:
             print("Command unknow")
     client.loop_stop()
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

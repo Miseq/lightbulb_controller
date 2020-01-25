@@ -1,9 +1,5 @@
-import main
-import sys
 import paho.mqtt.client as mqtt
-from _thread import start_new_thread
-import threading
-import time
+
 
 class LightBulb(mqtt.Client):
     def __init__(self,id, broker_address='localhost', stan=0):
