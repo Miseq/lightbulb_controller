@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 class LightBulb(mqtt.Client):
     def __init__(self,id, broker='localhost', stan=0):
         super(LightBulb, self).__init__(id)
-        self._id = id
+        self._id = id # zakladam ze bedzie tekstem, w budynku lb raczej bd nazwane "front-1" || "portiernia"
         self._stan = stan #0:OFF 1:ON
         self.broker = broker
     @property
@@ -31,14 +31,14 @@ class LightBulb(mqtt.Client):
         print(f"Status changed to: {self.stan}")
 
     def on_disconnect(self):
-        self.publish("nonactive", self.id)
-        self.disconnect()
+        self.publish("nonactive", self.id) #TODO dodać usuwanie na disconnecta w tablicy sql
         print("Succesfully disconnected")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         m_decode = str(msg.payload.decode("utf-8","ignore"))
         print("\nMessage from broker recived: ", end="")
+        print(topic)
         if topic == f"command-{client.id}" or topic == "command-all":
             if m_decode == "ON" or m_decode == '1':
                 self.change_status(1)

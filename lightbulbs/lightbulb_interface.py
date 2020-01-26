@@ -8,16 +8,16 @@ def connect_to_broker(client):
     print(f"connecting to brokrer {client.broker}")
     try:
         client.connect(client.broker)
-        client.loop_start()
     except:
         print(f"Cannot connect to broker: {client.broker}")
 
 def main(*args, **kwargs):
-    #TODO dodac __init__
     #TODO zrobic sprawdzanie zajetosci ID urzadzenia
-    client = LightBulb("Alfa")
+    #TODO arg_parser
+    client = LightBulb("Beta")
 
     connect_to_broker(client)
+    client.loop_start()
     time.sleep(0.5)
     print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
     print("To show current status: type 'status', turning on/off type 'on' or 'off', to exit type 'e' ", end="")
@@ -36,11 +36,14 @@ def main(*args, **kwargs):
         elif x == 'connected' or x == 'c':
             print(f"Connected: {client.is_connected()}")
         elif x == 'reconnect' or x == 'r':
-            connect_to_broker(client,broker)
-
+            connect_to_broker(client.broker)
+        elif x == '0':
+            client.on_disconnect()
+            break
         else:
             print("Command unknow")
     client.loop_stop()
+    client.disconnect()# mozna uzyc publish single ale jest mniej czytelne wg mnie.
 
 if __name__ == "__main__":
     main()
