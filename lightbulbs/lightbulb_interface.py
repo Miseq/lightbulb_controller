@@ -2,6 +2,7 @@ import time
 import sys
 sys.path.append('../')
 from lightbulbs.lightbulb import LightBulb
+import argparse
 
 
 def connect_to_broker(client):
@@ -11,10 +12,17 @@ def connect_to_broker(client):
     except:
         print(f"Cannot connect to broker: {client.broker}")
 
+
 def main(*args, **kwargs):
-    #TODO zrobic sprawdzanie zajetosci ID urzadzenia
-    #TODO arg_parser
-    client = LightBulb("Beta")
+    parser = argparse.ArgumentParser('Konfiguracja klienta punktu swietlnego')
+    #parser.add_help ???
+    parser.add_argument('-id', dest='id',  help='Unikatowe ID clienta', required= True)
+    parser.add_argument('-broker', dest='broker', default='localhost',
+                        help='Opcjonalny adres brokera, domyslnie localhost', required=False)
+    parser.add_argument('-status', dest='status', default='OFF',
+                        help='Stan poczatkowy punktu swietlnego: ON/OFF', required=False )
+    args = parser.parse_args()
+    client = LightBulb(args.id, args.broker, args.status)
 
     connect_to_broker(client)
     client.loop_start()

@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 
 
 class LightBulb(mqtt.Client):
-    def __init__(self,id, broker='localhost', stan=0):
+    def __init__(self,id, broker, stan):
         super(LightBulb, self).__init__(id)
         self._id = id # zakladam ze bedzie tekstem, w budynku lb raczej bd nazwane "front-1" || "portiernia"
         self._stan = stan #0:OFF 1:ON
