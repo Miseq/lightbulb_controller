@@ -13,18 +13,18 @@ def print_menu():
 def show_user_interface(client):
     print_menu()
     while True:
-        x = input("- ").lower()
-        if x == '1':
+        user_input = input("- ").lower()
+        if user_input == '1':
             print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
-        elif x == '2':
+        elif user_input == '2':
             client.change_status('ON')
-        elif x == '3':
+        elif user_input == '3':
             client.change_status('OFF')
-        elif x == '4':
+        elif user_input == '4':
             client.connect_to_broker()
-        elif x == '5':
+        elif user_input == '5':
             print_menu()
-        elif x == '0':
+        elif user_input == '0':
             client.disconnect()
             break
         else:
