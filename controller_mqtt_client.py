@@ -2,17 +2,17 @@ import paho.mqtt.client as mqtt
 import time
 from controller_sqlite_client import ControllerSqlite
 
+
 class ControllerMQTT(mqtt.Client):
     def __init__(self, controller_name, database_name='lightbulbs', sql_table_name='lightbulbs'):
         super(ControllerMQTT, self).__init__(controller_name)
-        self.connected_lightbulbs_list = [] #TODO przerobic na liste robiona z selecta do sqllite
+        self.connected_lightbulbs_list = []  # TODO przerobic na liste robiona z selecta do sqllite
         self.sql_client = ControllerSqlite(f"{database_name}.sqlite3")
         self.sql_client.connect_to_database()
         self.sql_client.create_table_if_dosent_exists(sql_table_name)
 
-
     def on_log(self, client, userdata, level, buf):
-        #print(f"log {buf}") #TODO zapis logów do pliku
+        # print(f"log {buf}") #TODO zapis logów do pliku
         pass
 
     def on_connect(self, client, userdata, flags, rc):
@@ -25,24 +25,23 @@ class ControllerMQTT(mqtt.Client):
         self.sql_client.delete_table()
         self.sql_client.sqlite_connection.close()
 
-
     def on_message(self, client, userdata, msg):
         topic = msg.topic
-        m_decode = str(msg.payload.decode("utf-8","ignore"))
+        m_decode = str(msg.payload.decode("utf-8", "ignore"))
 
         if topic == 'active':
-            #if m_decode not in self.connected_lightbulbs_list:
-                print(f"New lighbulb detected, ID: {m_decode}")
-                self.connected_lightbulbs_list.append(m_decode)
-                new_topic_name = f"status-{m_decode}"
-                print(f"Subscribing to {new_topic_name}")
-                self.subscribe(new_topic_name)
-                self.sql_client.add_lightbulb(m_decode,'?')
+            # if m_decode not in self.connected_lightbulbs_list:
+            print(f"New lighbulb detected, ID: {m_decode}")
+            self.connected_lightbulbs_list.append(m_decode)
+            new_topic_name = f"status-{m_decode}"
+            print(f"Subscribing to {new_topic_name}")
+            self.subscribe(new_topic_name)
+            self.sql_client.add_lightbulb(m_decode, '?')
 
         elif 'status-' in topic:
             lighbulb_id = topic[7:]  # recznie usuwam 'status-', .strip moglby prowadzic do bugu gdyby id == 'status_'
             if m_decode == 'ON' or m_decode == 'OFF':
-                self.sql_client.change_status_lightbulb(m_decode,lighbulb_id)
+                self.sql_client.change_status_lightbulb(m_decode, lighbulb_id)
                 print(f"Status of lighbulb {lighbulb_id} updated! New status: {m_decode}")
 
         elif topic == 'nonactive':
@@ -55,7 +54,7 @@ class ControllerMQTT(mqtt.Client):
             print(f"message from topic - {topic}\nMessage: {m_decode}")
 
     def delete_lightbulb_from_db(self, lb_id):
-        if not lb_id in self.connected_lightbulbs_list:
+        if lb_id not in self.connected_lightbulbs_list:
             print("Nie rozpoznano id urzadzenia!")
             return None
         self.sql_client.delete_lightbulb(lb_id)

@@ -1,12 +1,13 @@
 from controller_mqtt_client import ControllerMQTT
 import time
 import argparse
-from controller_sqlite_client import ControllerSqlite
+
 
 def print_menu():
     print("1 - Pokaz opcje wyswietlania \n2 - Pokaz opcje wlaczania punktow swietlnych "
           "\n3 - Pokaz opcje wylaczania punktow swietlnych \n4 - Pokaz stan polaczenia "
           "\n5 - Wyswietl ponownie opis menu \n0 - Rozlacz i zakoncz dzialanie")
+
 
 def show_interface(controller):
     print_menu()
@@ -36,7 +37,7 @@ def show_interface(controller):
                                      "\n\t3 - Cofnij")
             if detailed_command == '1':
                 controller.change_lightbulbs_status('ON')
-            elif detailed_command =='2':
+            elif detailed_command == '2':
                 turn_on_id = input("\t\tPodaj id punktu swietlnego: ")
                 controller.change_lightbulbs_status('ON', turn_on_id)
             elif detailed_command == '3':
@@ -48,7 +49,7 @@ def show_interface(controller):
                                      "\n\t3 - Cofnij\n-")
             if detailed_command == '1':
                 controller.change_lightbulbs_status('OFF')
-            elif detailed_command =='2':
+            elif detailed_command == '2':
                 turn_on_id = input("\tPodaj id punktu swietlnego: ")
                 controller.change_lightbulbs_status('OFF', turn_on_id)
             elif detailed_command == '3':
@@ -66,13 +67,14 @@ def show_interface(controller):
         else:
             print("Nie rozpoznano polecenia!")
 
+
 def main():
     controller = ControllerMQTT(controller_name="Controller")
 
     print(f"connecting to brokrer {controller.broker}")
-    #TODO argumenty, help, adres, port, set_all, log itp.
+    # TODO argumenty, help, adres, port, set_all, log itp.
 
-    controller.connect('localhost') # TODO zrobic na argumencie
+    controller.connect('localhost')  # TODO zrobic na argumencie
     controller.loop_start()
     controller.subscribe("id")
     time.sleep(0.5)
@@ -81,6 +83,7 @@ def main():
 
     controller.loop_stop()
     controller.disconnect()
+
 
 if __name__ == '__main__':
     main()

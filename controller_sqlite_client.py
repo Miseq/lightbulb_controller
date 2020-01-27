@@ -1,5 +1,6 @@
 import sqlite3
 
+
 class ControllerSqlite:
     def __init__(self, database_name, id_col_name='lightbulb_id', status_col_name='lightbulb_status'):
         self.database_name = database_name
@@ -37,7 +38,7 @@ class ControllerSqlite:
                                   f"VALUES('{lightbulb_id}', '{lightbulb_status}');"
             self.cursor.execute(sqlite_insert_query)
 
-            if self.cursor.lastrowid != 0: # jesli ostatni wiersz ma rowid == 0 tzn ze nic nie dodano
+            if self.cursor.lastrowid != 0:  # jesli ostatni wiersz ma rowid == 0 tzn ze nic nie dodano
                 self.sqlite_connection.commit()
                 print(f"Succesfully added record of lightbulb {lightbulb_id} to database")
             else:
@@ -54,12 +55,11 @@ class ControllerSqlite:
         except sqlite3.Error as error:
             print(f"Error while changing status of: {record_id}, error:", error)
 
-
     def select_lightbulbs(self, expression):
         try:
             sql_select_query = f"select * from {self.table_name} {expression}"
             self.cursor.execute(sql_select_query)
-            return(self.cursor.fetchall())
+            return self.cursor.fetchall()
 
         except sqlite3.Error as error:
             print("Error while selecting recods from database", error)
@@ -68,7 +68,7 @@ class ControllerSqlite:
         try:
             sql_delete_query = f"DELETE from {self.table_name} where {self.id_col_name} = '{lightbulb_id}'"
             self.cursor.execute(sql_delete_query)
-            #TODO sprawdzic czy trzeba dawac ten commit
+            # TODO sprawdzic czy trzeba dawac ten commit
             print(f'Succesfully removed lightbulb {lightbulb_id} from database!')
         except sqlite3.Error as error:
             print(f"Error while deleting {lightbulb_id} from database: {error}")
@@ -76,7 +76,4 @@ class ControllerSqlite:
     def delete_table(self):
         self.cursor.execute(f"DROP TABLE IF EXISTS {self.table_name}")
         self.sqlite_connection.commit()
-
-
-
-#TODO jak bd czas to dodac topic - still active w ktorym po kazdej otrzymanej komendzie odsyla publikacje swojego id zeby kontroler wiedzial ze to jest dalej aktywne
+# TODO jak bd czas to dodac topic - still active w ktorym po kazdej otrzymanej komendzie odsyla publikacje swojego id zeby kontroler wiedzial ze to jest dalej aktywne

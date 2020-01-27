@@ -1,16 +1,15 @@
 import time
-
 import paho.mqtt.client as mqtt
 
 
 class LightBulb(mqtt.Client):
-    
-    
-    def __init__(self,id, broker, status):
+
+    def __init__(self, id, broker, status):
         super(LightBulb, self).__init__(id)
-        self._id = id # zakladam ze bedzie tekstem, w budynku lb raczej bd nazwane "front-1" || "portiernia"
+        self._id = id  # zakladam ze bedzie tekstem, w budynku lb raczej bd nazwane "front-1" || "portiernia"
         self._status = status
         self.broker = broker
+
     @property
     def id(self):
         return self._id
@@ -34,12 +33,12 @@ class LightBulb(mqtt.Client):
         print(f"Status changed to: {self.status}")
 
     def on_disconnect(self):
-        self.publish("nonactive", self.id) #TODO dodać usuwanie na disconnecta w tablicy sql
+        self.publish("nonactive", self.id)  # TODO dodać usuwanie na disconnecta w tablicy sql
         print("Succesfully disconnected")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
-        m_decode = str(msg.payload.decode("utf-8","ignore"))
+        m_decode = str(msg.payload.decode("utf-8", "ignore"))
         print("\nMessage from broker recived: ", end="")
         print(topic)
         if topic == f"command-{client.id}" or topic == "command-all":
