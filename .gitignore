@@ -2,3 +2,6 @@
 .gitignore
 .idea
 __pycache__/
+lightbulbs.sqlite3
+/tests/test_sql.sqlite3
+/tests/test_controller.sqlite3

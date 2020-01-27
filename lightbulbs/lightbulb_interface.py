@@ -19,7 +19,7 @@ def show_user_interface(client):
         if x == '1':
             print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
         elif x == '2':
-            client.change_status('ON') #TODO ON/OFF
+            client.change_status('ON')
         elif x == '3':
             client.change_status('OFF')
         elif x == '4':
