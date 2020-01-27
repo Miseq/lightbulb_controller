@@ -5,3 +5,6 @@ __pycache__/
 lightbulbs.sqlite3
 /tests/test_sql.sqlite3
 /tests/test_controller.sqlite3
+controller_logs.txt
+/lightbulbs/logs
+lightbulbs.sqlite3-journal

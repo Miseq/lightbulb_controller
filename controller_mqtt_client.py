@@ -1,19 +1,25 @@
+import datetime
 import paho.mqtt.client as mqtt
-import time
 from controller_sqlite_client import ControllerSqlite
 
 
 class ControllerMQTT(mqtt.Client):
-    def __init__(self, controller_name, database_name='lightbulbs', sql_table_name='lightbulbs'):
+    def __init__(self, controller_name, database_name,  log):
         super(ControllerMQTT, self).__init__(controller_name)
         self.connected_lightbulbs_list = []  # TODO przerobic na liste robiona z selecta do sqllite
         self.sql_client = ControllerSqlite(f"{database_name}.sqlite3")
         self.sql_client.connect_to_database()
-        self.sql_client.create_table_if_dosent_exists(sql_table_name)
+        self.sql_client.create_table_if_dosent_exists('lightbulbs')
+        self.log = log
 
     def on_log(self, client, userdata, level, buf):
-        # print(f"log {buf}") #TODO zapis logów do pliku
-        pass
+        if self.log:
+            with open("controller_logs.txt", 'a') as f:
+                time_stamp = datetime.datetime.now()
+                time_stamp = time_stamp.strftime("%d/%m/%Y %H:%M:%S")
+                f.write(f"\n{time_stamp} LOG: {buf}")
+        else:
+            pass
 
     def on_connect(self, client, userdata, flags, rc):
         print(f"Subscribing to: [active, nonactive]")
@@ -49,7 +55,6 @@ class ControllerMQTT(mqtt.Client):
             print(f"Lightbulb's interface {m_decode} is no longer active! Last known status was: {last_status}")
             self.delete_lightbulb_from_db(m_decode)
 
-        # TODO dodac still active jesli starczy czasu
         else:
             print(f"message from topic - {topic}\nMessage: {m_decode}")
 

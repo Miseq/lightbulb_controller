@@ -68,19 +68,29 @@ def show_interface(controller):
             print("Nie rozpoznano polecenia!")
 
 
+def manage_arguments():
+    parser = argparse.ArgumentParser('Konfiguracja klienta punktu swietlnego')
+    # parser.add_help ???
+    parser.add_argument('-n', dest='name', help='Unikatowa nazwa controllera', required=True)
+    parser.add_argument('-b', dest='broker', default='localhost',
+                        help='Opcjonalny adres brokera, domyslnie localhost', required=False)
+    parser.add_argument('-db', dest='database', default='lightbulbs',
+                        help='Nazwa uzywanej bazy danych, domyslnie "lighbulbs"', required=False)
+    parser.add_argument('-p', dest='port', default='1883',  help='Port laczycy z brokerem"', required=False)
+    parser.add_argument('-l', dest='log', default='True',
+                        help='Okresla czy program zapisuje logi komunikacji przez mqtt"', required=False)
+    return parser.parse_args()
+
+
 def main():
-    controller = ControllerMQTT(controller_name="Controller")
+    args = manage_arguments()
+    controller = ControllerMQTT(controller_name=args.name, database_name=args.database, log=args.log)
 
-    print(f"connecting to brokrer {controller.broker}")
-    # TODO argumenty, help, adres, port, set_all, log itp.
-
-    controller.connect('localhost')  # TODO zrobic na argumencie
+    print(f"connecting to brokrer {args.broker}")
+    controller.connect(args.broker)
     controller.loop_start()
-    controller.subscribe("id")
     time.sleep(0.5)
-
     show_interface(controller)
-
     controller.loop_stop()
     controller.disconnect()
 

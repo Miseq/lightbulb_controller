@@ -39,12 +39,14 @@ def manage_arguments():
                         help='Opcjonalny adres brokera, domyslnie localhost', required=False)
     parser.add_argument('-status', dest='status', default='OFF',
                         help='Stan poczatkowy punktu swietlnego: ON/OFF', required=False)
+    parser.add_argument('-l', dest='log', default='True',
+                        help='Okresla czy program zapisuje logi komunikacji przez mqtt"', required=False)
     return parser.parse_args()
 
 
 def main():
     args = manage_arguments()
-    client = LightBulb(args.id, args.broker, args.status)
+    client = LightBulb(args.id, args.broker, args.status, args.log)
 
     client.connect_to_broker()
     client.loop_start()

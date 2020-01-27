@@ -1,14 +1,14 @@
-import time
+import datetime
 import paho.mqtt.client as mqtt
 
 
 class LightBulb(mqtt.Client):
-
-    def __init__(self, id, broker, status):
+    def __init__(self, id, broker, status, log):
         super(LightBulb, self).__init__(id)
         self._id = id  # zakladam ze bedzie tekstem, w budynku lb raczej bd nazwane "front-1" || "portiernia"
         self._status = status
         self.broker = broker
+        self.log = log
 
     @property
     def id(self):
@@ -21,8 +21,17 @@ class LightBulb(mqtt.Client):
     @status.setter
     def status(self, new_status):
         if new_status != 'ON' and new_status != 'OFF':
-            raise ValueError("Wrong input, correct values are 0 for OFF and 1 for ON!")
+            raise ValueError("Wrong input, correct values are  OFF or ON!")
         self._status = new_status
+
+    def on_log(self, client, userdata, level, buf):
+        if self.log:
+            with  open(f"./logs/{self.id}.txt", 'a') as f:
+                time_stamp = datetime.datetime.now()
+                time_stamp = time_stamp.strftime("%d/%m/%Y %H:%M:%S")
+                f.write(f"\n{time_stamp} LOG: {buf}")
+        else:
+            pass
 
     def show_current_status(self):
         return f"Status:{self.status}"
@@ -33,7 +42,7 @@ class LightBulb(mqtt.Client):
         print(f"Status changed to: {self.status}")
 
     def on_disconnect(self):
-        self.publish("nonactive", self.id)  # TODO dodać usuwanie na disconnecta w tablicy sql
+        self.publish("nonactive", self.id)
         print("Succesfully disconnected")
 
     def on_message(self, client, userdata, msg):
