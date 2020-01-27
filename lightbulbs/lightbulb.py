@@ -26,7 +26,7 @@ class LightBulb(mqtt.Client):
 
     def on_log(self, client, userdata, level, buf):
         if self.log:
-            with  open(f"./logs/{self.id}.txt", 'a') as f:
+            with open(f"./logs/{self.id}.txt", 'a') as f:
                 time_stamp = datetime.datetime.now()
                 time_stamp = time_stamp.strftime("%d/%m/%Y %H:%M:%S")
                 f.write(f"\n{time_stamp} LOG: {buf}")
