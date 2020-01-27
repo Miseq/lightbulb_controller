@@ -22,12 +22,12 @@ class ControllerMQTT(mqtt.Client):
             pass
 
     def on_connect(self, client, userdata, flags, rc):
-        print(f"Subscribing to: [active, nonactive]")
+        print(f"Subskrybowanie: [active, nonactive]")
         self.subscribe("active")
         self.subscribe("nonactive")
 
     def on_disconnect(self, client, userdata, flags, rc=0):
-        print(f"Disconnected result code {str(rc)}")
+        print(f"Rozloczono z kodem: {str(rc)}")
         self.sql_client.delete_table()
         self.sql_client.sqlite_connection.close()
 
@@ -37,10 +37,10 @@ class ControllerMQTT(mqtt.Client):
 
         if topic == 'active':
             # if m_decode not in self.connected_lightbulbs_list:
-            print(f"New lighbulb detected, ID: {m_decode}")
+            print(f"Nowe urzadzenie wykryte, ID: {m_decode}")
             self.connected_lightbulbs_list.append(m_decode)
             new_topic_name = f"status-{m_decode}"
-            print(f"Subscribing to {new_topic_name}")
+            print(f"Subskrybowanie {new_topic_name}")
             self.subscribe(new_topic_name)
             self.sql_client.add_lightbulb(m_decode, '?')
 
@@ -48,19 +48,19 @@ class ControllerMQTT(mqtt.Client):
             lighbulb_id = topic[7:]  # recznie usuwam 'status-', .strip moglby prowadzic do bugu gdyby id == 'status_'
             if m_decode == 'ON' or m_decode == 'OFF':
                 self.sql_client.change_status_lightbulb(m_decode, lighbulb_id)
-                print(f"Status of lighbulb {lighbulb_id} updated! New status: {m_decode}")
+                print(f"Status urzadzenia {lighbulb_id} zaktualizowany! Nowy status: {m_decode}")
 
         elif topic == 'nonactive':
             last_status = self.sql_client.select_lightbulbs(f"where {self.sql_client.id_col_name} = '{m_decode}'")
-            print(f"Lightbulb's interface {m_decode} is no longer active! Last known status was: {last_status}")
+            print(f"Urzadzenie {m_decode} nie jest juz aktywne! Ostatni znany status to: {last_status}")
             self.delete_lightbulb_from_db(m_decode)
 
         else:
-            print(f"message from topic - {topic}\nMessage: {m_decode}")
+            print(f"Wiadomosc z tematu - {topic}\nWiadomosc: {m_decode}")
 
     def delete_lightbulb_from_db(self, lb_id):
         if lb_id not in self.connected_lightbulbs_list:
-            print("Nie rozpoznano id urzadzenia!")
+            print("Nie rozpoznano ID urzadzenia!")
             return None
         self.sql_client.delete_lightbulb(lb_id)
 
@@ -68,7 +68,6 @@ class ControllerMQTT(mqtt.Client):
         if condition == "ON" or condition == "OFF":
             condition = f" where {self.sql_client.status_col_name} = '{condition}'"
 
-        # jeśli istnieje warunek i nie dotyczy statusu, musi dotyczyć ID
         elif condition != "":
             if condition in self.connected_lightbulbs_list:
                 condition = f" where {self.sql_client.id_col_name} = '{condition}'"

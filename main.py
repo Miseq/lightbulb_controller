@@ -54,8 +54,6 @@ def show_interface(controller):
                 controller.change_lightbulbs_status('OFF', turn_on_id)
             elif detailed_command == '3':
                 continue
-            else:
-                print("nie rozpoznano komendy!")
 
         elif user_input == '4':
             print(f"Polaczenie z brokeren: {controller.is_connected()}")
@@ -70,13 +68,11 @@ def show_interface(controller):
 
 def manage_arguments():
     parser = argparse.ArgumentParser('Konfiguracja klienta punktu swietlnego')
-    # parser.add_help ???
     parser.add_argument('-n', dest='name', help='Unikatowa nazwa controllera', required=True)
     parser.add_argument('-b', dest='broker', default='localhost',
                         help='Opcjonalny adres brokera, domyslnie localhost', required=False)
     parser.add_argument('-db', dest='database', default='lightbulbs',
                         help='Nazwa uzywanej bazy danych, domyslnie "lighbulbs"', required=False)
-    parser.add_argument('-p', dest='port', default='1883',  help='Port laczycy z brokerem"', required=False)
     parser.add_argument('-l', dest='log', default='True',
                         help='Okresla czy program zapisuje logi komunikacji przez mqtt', required=False)
     return parser.parse_args()

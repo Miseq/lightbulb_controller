@@ -51,7 +51,7 @@ def main():
     client.connect_to_broker()
     client.loop_start()
     time.sleep(0.5)  # czas na poprawne pobranie i wyslanie wiadomosci
-
+    print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
     show_user_interface(client)
 
     client.loop_stop()

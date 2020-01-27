@@ -21,7 +21,7 @@ class LightBulb(mqtt.Client):
     @status.setter
     def status(self, new_status):
         if new_status != 'ON' and new_status != 'OFF':
-            raise ValueError("Wrong input, correct values are  OFF or ON!")
+            raise ValueError("Niepoprawny status! Poprawne wartosci to 'ON' lub 'OFF'")
         self._status = new_status
 
     def on_log(self, client, userdata, level, buf):
@@ -39,16 +39,16 @@ class LightBulb(mqtt.Client):
     def change_status(self, new_status):
         self.status = new_status
         self.publish(f"status-{self.id}", f'{self.status}', retain=True)
-        print(f"Status changed to: {self.status}")
+        print(f"Status zmieniony na: {self.status}")
 
     def on_disconnect(self):
         self.publish("nonactive", self.id)
-        print("Succesfully disconnected")
+        print("Poprawnie rozlaczono")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         m_decode = str(msg.payload.decode("utf-8", "ignore"))
-        print("\nMessage from broker recived: ", end="")
+        print(f"\nOtrzymano wiadomosc na temat: {topic}")
         print(topic)
         if topic == f"command-{client.id}" or topic == "command-all":
             if m_decode == "ON":
@@ -56,18 +56,18 @@ class LightBulb(mqtt.Client):
             elif m_decode == "OFF":
                 self.change_status('OFF')
         else:
-            print(f"message from topic - {topic}\nMessage: {m_decode}")
+            print(f"\nWiadomosc: {m_decode}")
 
     def on_connect(self, client, userdata, flags, rc):
-        print(f"Subscribing to: command-{self.id} and command-all")
+        print(f"Subskrybowane tematy: 'command-{self.id}' oraz 'command-all'")
         self.subscribe(f"command-{self.id}")
         self.subscribe("command-all")
         self.publish("active", self.id, retain=True)
         self.publish(f"status-{self.id}", f'{self.status}', retain=True)
 
     def connect_to_broker(self):
-        print(f"connecting to brokrer {self.broker}")
+        print(f"Polaczono z brokerem: {self.broker}")
         try:
             self.connect(self.broker)
         except:
-            print(f"Cannot connect to broker: {self.broker}")
+            print(f"Nie udalo sie nawiazac polaczenia z brokerem: {self.broker}")

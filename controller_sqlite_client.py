@@ -4,7 +4,6 @@ import sqlite3
 class ControllerSqlite:
     def __init__(self, database_name, id_col_name='lightbulb_id', status_col_name='lightbulb_status'):
         self.database_name = database_name
-        # Zainicjowane pozniej w odpowiednich metodach
         self.id_col_name = id_col_name
         self.status_col_name = status_col_name
         self.table_name = None
@@ -15,9 +14,9 @@ class ControllerSqlite:
         try:
             self.sqlite_connection = sqlite3.connect(self.database_name, check_same_thread=False)
             self.cursor = self.sqlite_connection.cursor()
-            print("Database created and Successfully Connected to SQLite")
+            print("Baza danych stworzony i poprawnie polaczona z SQLite")
         except sqlite3.Error as error:
-            print("Error while connecting to sqlite", error)
+            print("Napotkano problem przy polaczeniu z baza danych: ", error)
 
     def create_table_if_dosent_exists(self, table_name):
         try:
@@ -28,9 +27,9 @@ class ControllerSqlite:
                                   f"CHECK ({self.status_col_name} = 'ON' OR {self.status_col_name} = 'OFF' " \
                                   f"OR {self.status_col_name} = '?'))"
             self.cursor.execute(sqlite_create_query)
-            print(f"Succesfully created table {table_name}")
+            print(f"Poprawnie stwrzono tabele: {table_name}")
         except sqlite3.Error as error:
-            print("Error while creating table: ", error)
+            print("Napotkano problem podczas tworzenia tabeli: ", error)
 
     def add_lightbulb(self, lightbulb_id, lightbulb_status):
         try:
@@ -40,11 +39,11 @@ class ControllerSqlite:
 
             if self.cursor.lastrowid != 0:  # jesli ostatni wiersz ma rowid == 0 tzn ze nic nie dodano
                 self.sqlite_connection.commit()
-                print(f"Succesfully added record of lightbulb {lightbulb_id} to database")
+                print(f"Poprawnie dodano wpis o urzdzeniu: {lightbulb_id} do bazy danych")
             else:
                 raise sqlite3.Error
         except sqlite3.Error as error:
-            print(f"Error while adding record to database: {error}")
+            print(f"Napotkano problem podczas dodawania rekordu do bazy danych: {error}")
 
     def change_status_lightbulb(self, new_status, record_id):
         try:
@@ -53,7 +52,7 @@ class ControllerSqlite:
                                f"where {self.id_col_name} = '{record_id}'"
             self.cursor.execute(sql_update_query)
         except sqlite3.Error as error:
-            print(f"Error while changing status of: {record_id}, error:", error)
+            print(f"Napotkano problem podczas zmiany statusu urzadzenia: {record_id}, blad: ", error)
 
     def select_lightbulbs(self, expression):
         try:
@@ -62,18 +61,16 @@ class ControllerSqlite:
             return self.cursor.fetchall()
 
         except sqlite3.Error as error:
-            print("Error while selecting recods from database", error)
+            print("Napotkano problem podczas wykonywania polecenia SELECT: ", error)
 
     def delete_lightbulb(self, lightbulb_id):
         try:
             sql_delete_query = f"DELETE from {self.table_name} where {self.id_col_name} = '{lightbulb_id}'"
             self.cursor.execute(sql_delete_query)
-            # TODO sprawdzic czy trzeba dawac ten commit
-            print(f'Succesfully removed lightbulb {lightbulb_id} from database!')
+            print(f'Poprwanie usunieto urzadzenie: {lightbulb_id} z bazy danych!')
         except sqlite3.Error as error:
-            print(f"Error while deleting {lightbulb_id} from database: {error}")
+            print(f"Napotkano problem podczas usuwania urzadzenia: {lightbulb_id} z bazy danych: {error}")
 
     def delete_table(self):
         self.cursor.execute(f"DROP TABLE IF EXISTS {self.table_name}")
         self.sqlite_connection.commit()
-# TODO jak bd czas to dodac topic - still active w ktorym po kazdej otrzymanej komendzie odsyla publikacje swojego id zeby kontroler wiedzial ze to jest dalej aktywne
