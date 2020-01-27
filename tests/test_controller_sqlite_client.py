@@ -1,4 +1,6 @@
 import unittest
+import sys
+sys.path.append('../')
 from controller_sqlite_client import ControllerSqlite
 
 

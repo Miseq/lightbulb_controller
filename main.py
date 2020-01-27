@@ -78,7 +78,7 @@ def manage_arguments():
                         help='Nazwa uzywanej bazy danych, domyslnie "lighbulbs"', required=False)
     parser.add_argument('-p', dest='port', default='1883',  help='Port laczycy z brokerem"', required=False)
     parser.add_argument('-l', dest='log', default='True',
-                        help='Okresla czy program zapisuje logi komunikacji przez mqtt"', required=False)
+                        help='Okresla czy program zapisuje logi komunikacji przez mqtt', required=False)
     return parser.parse_args()
 
 

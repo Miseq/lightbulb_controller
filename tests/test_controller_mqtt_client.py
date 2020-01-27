@@ -1,5 +1,7 @@
 import time
 import unittest
+import sys
+sys.path.append('../')
 from controller_mqtt_client import ControllerMQTT
 
 
