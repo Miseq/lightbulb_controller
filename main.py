@@ -1,98 +1,99 @@
-import argparse
-import requests
+import time
+from flask import Flask, make_response, jsonify
+from controller_mqtt_client import ControllerMQTT
+from flask import request
+from flask.views import MethodView
+
+app = Flask(__name__)
+controller = ControllerMQTT("Zbyszek", 'lightbulbs', True)
 
 
-def print_basic_menu():
-    print(f"1 - Pokaz opcje wyswietlania "
-          f"\n2 - Pokaz opcje wlaczania punktow swietlnych "
-          f"\n3 - Pokaz opcje wylaczania punktow swietlnych "
-          f"\n4 - Pokaz stan polaczenia "
-          f"\n5 - Wyswietl ponownie opis menu "
-          f"\n6 - Rozlacz i zakoncz dzialanie")
+class AllLighbutlbs(MethodView):  
+    @staticmethod
+    def get():
+        output = controller.show_lightbulbs("")
+        return make_response(jsonify(output), 200)
+   
+    @staticmethod
+    def post():
+        data = request.get_json()
+        condition = data.get("condition")
+        controller.change_lightbulbs_status(condition)
+        time.sleep(0.5)
+        output = controller.show_lightbulbs("")
+        return make_response(jsonify(output), 200)
+    
+    @staticmethod
+    def delete():
+        controller.sql_client.delete_table()
+        controller.sql_client.create_table_if_dosent_exists(controller.sql_client.table_name)
+        return make_response(jsonify("Usunieto wszystkie rekordy"), 200)
 
 
-def show_lightbubs_menu(url, port):
-    detailed_command = input("\t1 - Pokaz wszystkie"
-                             "\n\t2 - Pokaz tylko wlaczone "
-                             "\n\t3 - Pokaz tylko wylaczone "
-                             "\n\t4 - Pokaz konkretny punkt swietlny "
-                             "\n\t5 - Cofnij \n\t- ")
-    if detailed_command == '1':
-        print(requests.get(f'{url}:{port}/api/lightbulbs/all').text)
-    elif detailed_command == '2':
-        print(requests.get(f'{url}:{port}/api/lightbulbs/on').text)
-    elif detailed_command == '3':
-        print(requests.get(f'{url}:{port}/api/lightbulbs/off').text)
-    elif detailed_command == '4':
-        id_to_show = input("\t\tPodaj id punktu swietlnego: ")
-        print(requests.get(f'{url}:{port}/api/lightbulbs/{id_to_show}').text)
-    elif detailed_command == '5':
-        return None
+class OnOnlyLightbulbs(MethodView):
+    @staticmethod
+    def get():
+        output = dict(controller.show_lightbulbs("ON"))
+        return output
 
 
-def turn_lightbubs_on_menu(url, port):
-    detailed_command = input("\t1 - Wlacz wszystkie"
-                             "\n\t2 - Wlacz konkretne urzadzenie"
-                             "\n\t3 - Cofnij\n\t-")
-    if detailed_command == '1':
-        print(requests.post(f'{url}:{port}/api/lightbulbs/all', json={"condition": "ON"}).text)
-    elif detailed_command == '2':
-        turn_on_id = input("\t\tPodaj id punktu swietlnego: ")
-        print(requests.post(f'{url}:{port}/api/lightbulbs/{turn_on_id}', json={"condition": "ON"}).text)
-    elif detailed_command == '3':
-        return None
+class OffOnlyLightbulbs(MethodView):
+    @staticmethod
+    def get():
+        output = dict(controller.show_lightbulbs("OFF"))
+        return output
 
 
-def turn_lightbubs_off_menu(url, port):
-    detailed_command = input("\t1 - Wylacz wszystkie"
-                             "\n\t2 - Wylacz konkretne urzadzenie"
-                             "\n\t3 - Cofnij\n\t-")
-    if detailed_command == '1':
-        print(requests.post(f'{url}:{port}/api/lightbulbs/all', json={"condition": "OFF"}).text)
-    elif detailed_command == '2':
-        turn_on_id = input("\tPodaj id punktu swietlnego: ")
-        print(requests.post(f'{url}:{port}/api/lightbulbs/{turn_on_id}', json={"condition": "OFF"}).text)
-    elif detailed_command == '3':
-        return None
+class SingleLightbulb(MethodView):
+    @staticmethod
+    def get(lightbulb_id):
+        try:
+            output = dict(controller.show_lightbulbs(lightbulb_id))
+            return make_response(jsonify(output), 200)
+        except TypeError:
+            return make_response(jsonify("Nie znaleziono urzadzenia o takim lightbulb_id"), 404)
+        
+    @staticmethod
+    def post(lightbulb_id):
+        try:
+            data = request.get_json()
+            condition = data.get("condition")
+            controller.change_lightbulbs_status(condition, lightbulb_id)
+            time.sleep(0.5)
+            output = dict(controller.show_lightbulbs(lightbulb_id))
+            return make_response(jsonify(output), 200)
+        except TypeError:
+            return make_response(jsonify("Nie znaleziono urzadzenia o takim lightbulb_id"), 404)
+    
+    @staticmethod
+    def delete(lightbulb_id):
+        try:
+            output = controller.delete_lightbulb_from_db(lightbulb_id)
+            return make_response(jsonify(output), 200)
+        except TypeError:
+            return make_response(jsonify("Nie znaleziono urzadzenia o takim lightbulb_id"), 404)
 
 
-def show_interface(url, port):
-    print_basic_menu()
-    while True:
-        user_input = input("- ").lower()
-        if user_input == '1':
-            show_lightbubs_menu(url, port)
-
-        elif user_input == '2':
-            turn_lightbubs_on_menu(url, port)
-
-        elif user_input == '3':
-            turn_lightbubs_off_menu(url, port)
-
-        elif user_input == '4':
-            print(f"Polaczenie z brokeren: {requests.get(f'{url}:{port}/api/connection').text}")
-
-        elif user_input == '5':
-            print_basic_menu()
-
-        elif user_input == '0':
-            print(requests.delete(f'{url}:{port}/api/connection').text)
-            break
-
-        else:
-            print("Nie rozpoznano polecenia!")
+class Conection(MethodView): 
+    @staticmethod
+    def get():
+        return make_response(jsonify(controller.is_connected()), 200)
+    
+    @staticmethod
+    def delete():
+        controller.disconnect()
+        return make_response(jsonify(f"Polaczenie z brokerem zakonczone"))
 
 
-def manage_arguments():
-    parser = argparse.ArgumentParser('Konfiguracja klienta punktu swietlnego')
-    parser.add_argument('-url', dest='flask_url', default='http://127.0.0.1',
-                        help='Adres serwera REST API, domyslnie http://127.0.0.1', required=False)
-    parser.add_argument('-p', dest='flask_port', default='5000',
-                        help='Port serwera API, domyslnie 5000', required=False)
-
-    return parser.parse_args()
-
+app.add_url_rule("/api/lightbulbs/on", view_func=OnOnlyLightbulbs.as_view("on_only"))
+app.add_url_rule("/api/lightbulbs/off", view_func=OffOnlyLightbulbs.as_view("off_only"))
+app.add_url_rule("/api/connection", view_func=Conection.as_view("connection"))
+app.add_url_rule("/api/lightbulbs/all", view_func=AllLighbutlbs.as_view("lightbulbs_all"))
+app.add_url_rule("/api/lightbulbs/<lightbulb_id>", view_func=SingleLightbulb.as_view("single_lightbulb"))
 
 if __name__ == '__main__':
-    args = manage_arguments()
-    show_interface(args.flask_url, args.flask_port)
+    controller.connect('broker.hivemq.com')
+    controller.loop_start()
+    app.run('127.0.0.1', 5000, debug=False)
+    controller.loop_stop()
+    controller.disconnect()
