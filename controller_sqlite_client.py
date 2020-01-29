@@ -1,4 +1,5 @@
 import sqlite3
+import time
 
 
 class ControllerSqlite:
@@ -14,9 +15,9 @@ class ControllerSqlite:
         try:
             self.sqlite_connection = sqlite3.connect(self.database_name, check_same_thread=False)
             self.cursor = self.sqlite_connection.cursor()
-            print("Baza danych stworzony i poprawnie polaczona z SQLite")
+            return f"Baza danych: {self.database_name} zostala stworzona i poprawnie polaczona z SQLite"
         except sqlite3.Error as error:
-            print("Napotkano problem przy polaczeniu z baza danych: ", error)
+            return f"Napotkano problem przy polaczeniu z baza danych: {error}"
 
     def create_table_if_dosent_exists(self, table_name):
         try:
@@ -27,9 +28,10 @@ class ControllerSqlite:
                                   f"CHECK ({self.status_col_name} = 'ON' OR {self.status_col_name} = 'OFF' " \
                                   f"OR {self.status_col_name} = '?'))"
             self.cursor.execute(sqlite_create_query)
-            print(f"Poprawnie stwrzono tabele: {table_name}")
+            self.sqlite_connection.commit()
+            return f"Poprawnie stworzono tabele: {table_name}"
         except sqlite3.Error as error:
-            print("Napotkano problem podczas tworzenia tabeli: ", error)
+            return f"Napotkano problem podczas tworzenia tabeli: {error}"
 
     def add_lightbulb(self, lightbulb_id, lightbulb_status):
         try:
@@ -39,11 +41,11 @@ class ControllerSqlite:
 
             if self.cursor.lastrowid != 0:  # jesli ostatni wiersz ma rowid == 0 tzn ze nic nie dodano
                 self.sqlite_connection.commit()
-                print(f"Poprawnie dodano wpis o urzdzeniu: {lightbulb_id} do bazy danych")
+                return f"Poprawnie dodano wpis o urzdzeniu: {lightbulb_id} do bazy danych"
             else:
                 raise sqlite3.Error
         except sqlite3.Error as error:
-            print(f"Napotkano problem podczas dodawania rekordu do bazy danych: {error}")
+            return f"Napotkano problem podczas dodawania rekordu do bazy danych: {error}"
 
     def change_status_lightbulb(self, new_status, record_id):
         try:
@@ -52,7 +54,7 @@ class ControllerSqlite:
                                f"where {self.id_col_name} = '{record_id}'"
             self.cursor.execute(sql_update_query)
         except sqlite3.Error as error:
-            print(f"Napotkano problem podczas zmiany statusu urzadzenia: {record_id}, blad: ", error)
+            return "Napotkano problem podczas zmiany statusu urzadzenia: {record_id}, blad: {error}"
 
     def select_lightbulbs(self, expression):
         try:
@@ -61,15 +63,15 @@ class ControllerSqlite:
             return self.cursor.fetchall()
 
         except sqlite3.Error as error:
-            print("Napotkano problem podczas wykonywania polecenia SELECT: ", error)
+            return f"Napotkano problem podczas wykonywania polecenia SELECT: {error}"
 
     def delete_lightbulb(self, lightbulb_id):
         try:
             sql_delete_query = f"DELETE from {self.table_name} where {self.id_col_name} = '{lightbulb_id}'"
             self.cursor.execute(sql_delete_query)
-            print(f'Poprwanie usunieto urzadzenie: {lightbulb_id} z bazy danych!')
+            return f'Poprwanie usunieto urzadzenie: {lightbulb_id} z bazy danych!'
         except sqlite3.Error as error:
-            print(f"Napotkano problem podczas usuwania urzadzenia: {lightbulb_id} z bazy danych: {error}")
+            return f"Napotkano problem podczas usuwania urzadzenia: {lightbulb_id} z bazy danych: {error}"
 
     def delete_table(self):
         self.cursor.execute(f"DROP TABLE IF EXISTS {self.table_name}")

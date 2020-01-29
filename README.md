@@ -12,34 +12,34 @@ Na projekt sklada sie 5 czesci:
 ![Schemat dzialania](./schemat.png)
 
 ## Instalacja
-Podstawowym wymaganiem jest instalacja brokera MQTT, w projekcie uzywany byl **"mosquitto"** w wersji **1.6.8** 
-zainstalowany na Arch Linux - dystrybucja Manjaro, z wykorzystaniem polecenia:
-```bash
-sudo pacman -Sy mosquitto
-```
-Nastepnie nalezy za pomoca pliku requirements.txt, zainstalowac odpowiednia wersje modulu **"paho-mqtt"** 
-odpowiadajacego w Pythonie za obsluge protokolu MQTT. Wykorzystywana wersja Pythona - **3.8**
+Do poprawnego dzialania aplikacji nalezy zainstalowac wszystkie moduly znajduje sie w pliku requirements.txt
+Mozna tego dokonac za pomoca polecenia:
 ```bash
 pip3 install -r requirements.txt
 ```
 ## Uruchomienie
 Ponizej opisany jest sposob na podstawowe uruchomienie oraz typowe dzialania. Dokladny opis 
 aplikacji znajduje sie w dalszej czesci.
-Kolejnosc uruchamiania nie ma znaczenia. Nalezy pamietac aby **lightbulb_interface.py**, uruchamiac bedac w ich
-folderze, lub z wykorzystaniem IDE jako projekt. Ograniczenia subskrybowania mqtt, sprawiaja ze kontroler bedzie w
-stanie dodac i odczytac ID tylko ostatnio uruchomionego punktu swietlnego. Aby polaczyc pozostale wystarczy wprowadzic
-w interfejsie konkretnego urzadzenia **'4'**, badz zrestartowac dany interfejs.
+W pierwszej kolejnosci nalezy uruchomic serwer REST api, za pomoca pliku **flask_mqtt_controller.py**, gdy kontroler juz
+dziala mozemy zaczac uruchamiac urzadzenia poprzez plik **lightbulb_interface.py** z argumentem **"-id"**, oraz wysylac
+odpowiednie zapytania REST za pomoca **curl**, **Postmana**, badz innego narzedzia do obslugi polecen. Mozna rowniez 
+wykorzystac interfejs konsolowy zawierajacy wybierane menu wszystkich dostepnych polecen. Interfejs uruchamiamy z pliku
+**main.py**.
 
 Do zapewnienia dzialania nalezy uruchomic **"main.py"** z glownego folderu projektu, oraz **"lightbulb_interface.py"** z 
 folderu **"lightbulbus"**
-- **"main.py"** - wymaga podania za pomoca argumentu **"-n"** unikatowej nazwy kontrolera, pozostale dostepne, 
-opcjonalne argumenty mozna wyswietlic podajac argument **"-h"**
-- **"lightbulb_interface.py"**  wymaga podania argumentu **"-id"**: unikatowego ID punktu swietlnego po ktorym bedzie on 
-rozpoznawany. Jak wyzej, pozostale, opcjonalne argumenty widoczne sa za pomoca **"-h"**. Domyslnie wszystkie punkty 
-uruchamiane sa w stanie wylaczonym.
 
-## Dzialanie
-Wszystkie dzialania wykonuje sie za pomoca polecen interfejsow.
+- **flask_mqtt_controller.py** - nie wymaga poadawania zadnych argumentow podczas uruchamiania, pozwala jednak doadac 
+arguemntu zmieniajace domyslny adres url i port uruchamianego serwera
+- **"lightbulb_interface.py"**  wymaga podania argumentu **"-id"**: unikatowego ID punktu swietlnego po ktorym bedzie on 
+rozpoznawany. Pozostale parametry pozwalaja zmodyfikowac domyslny stan urzadzenia, wylaczyc logi, oraz zmienic 
+wykorzystywany broker
+- **"main.py"** - nie wymaga zadnych argumentow, dostepne pozwalaja zmienic adres url oraz port do ktorego wysyalne beda
+zapytania
+
+## Dzialanie - interfejsy
+Dzialania mozna wykonywaz zarowno poprzez interfejs(kontroler/urzadzenie) jak i poprzez wysylanie zapytan REST z aplikacji
+trzecich(tylko kontroler)
 
 **Kontroler:**
 
@@ -63,7 +63,7 @@ kontroler natychmiast otrzymuje ID oraz status, dzieki wykorzystaniu funkcji **"
 
 
 **Mockup punktu swietlnego:**
-- Wyswietlic swoj obecny status zawierajacy: ID, stan polaczenia, oraz status swiecenia.
+- Wyswietlic obecny status urzadzenia zawierajacy: ID, stan polaczenia, oraz status swiecenia.
 - Zmienic status oswietlenia na wlaczony/wylaczony 
 - Odnowic polaczenie w wypadku jego utraty
 - Zakonczyc dzialanie programu i poinformowac o tym kontroler
@@ -71,9 +71,20 @@ kontroler natychmiast otrzymuje ID oraz status, dzieki wykorzystaniu funkcji **"
 Ponadto, domyslnie obie aplikacje prowadza rejestr komunikatow wymienianch za pomoca protokolu MQTT, zawierajacy 
 polecenia wraz z data i godzina zarejestrowania.
 
-## Przykladowe dzialanie - odczytanie stanu a nastepnie wlaczenie wszystkich urzadzen
+## Obslugiwane adresy url serwera REST API
+- http://<ip>:<port>/api/lightbulbs/all - Wprowadzanie zmian na wszystkich aktywnych urzadzeniach. Obsluga: GET, POST, DELETE  
+- http://<ip>:<port>/api/lightbulbs/<lightbulb_id> - Modyfikowanie pojedynczego urzadzenia. Obsluga GET, POST, DELETE
+- http://<ip>:<port>/api/connection - Dotyczy polaczenia, informacji o nim i zamkniecia go. Obsluga: GET, DELETE
+- http://<ip>:<port>/api/lightbulbs/off - Zwraca wszystkie aktywne, wylaczone urzadzenia. Obsluga: GET
+- http://<ip>:<port>/api/lightbulbs/on - Zwraca wszystkie aktywne, wlaczone urzadzenia. Obsluga: GET
 
+
+## Przykladowy eksperyment
 w folderze glownym projektu:
+```bash
+python flask_mqtt_controller.py -n kontroler
+```
+dodatkowo mozna:
 ```bash
 python main.py -n kontroler
 ```
@@ -103,20 +114,19 @@ najpierw **2**, nastepnie zas **1**.
 
 Po powtorzeniu komend wyswietlajacych wszystkie urzadzenia powinnismy zobaczyc:
 **[('zeta', 'ON'), ('gamma', 'ON'), ('beta', 'ON'), ('alfa', 'ON')]**
+
 ## Dokladny opis plikow i klas
 **main.py**:
+Jest to prosty interfejs, majacy na celu zapewnienie uzytkownikowi łatwej komunikacji z kontrolerem, zawiera funkcjie
+odpowiedzialne za wypisywanie instrukcji i odczytywanie polecen uzytkownika. Funkcje to wywyoluja rowniez odpowiednie
+zapytania REST.
 
-Plik ten zawiera funkcje odpowiadajace za komunikacje pomiedzy uzytkownikiem a aplikacja kontrolera, w tym pliku rowniez
-znajduje sie parser argumentow, oraz inicjalizacja obiektu klasy **"ControllerMQTT"**. W funkcji main, po nawiazaniu 
-polaczenia, wykonywana jest komenda 
-```python
-time.sleep(0.5)
-```
-majaca na celu wstrzymanie pracy programu, do momentu az otrzyma on i zapisze wszystkie wiadomosci 
-przychodzace na zasubskrybowane tematy.
+**flask_mqtt_controller.py**
+Definiuje serwer postawiony na frameworku Flask. Serwer ten jest posrednikiem w komunikacji pomiedzy kontrolerem a
+uzytkownikiem. To on konwertuje zapytania REST na metody wykonywane przez kontroler, oraz zwraca ich wynik uzytkownikowi.
+
 
 **controller_mqtt_client**:
-
 Jest to serce dzialania calej aplikacji. W tym pliku opisane sa metody kontrolera. Podczas inicjalizacji, kontroler,
 dziedziczacy z klasy paho.mqtt.client.Client, tworzy obiet bazy danych: **"ControllerSqlite"**, nawiazuje z nia polaczenie oraz
 tworzy pusta tabele stanow urzadzen(o ile dana tabela nie istniala wczesniej). Okresla rowniez czy zapisywane beda logi
@@ -136,8 +146,6 @@ interfejsu punktu swietlnego. Po otrzymaniu wiadomosci, urzadzenie o danym ID zo
 rowniez wypisana odpowiednia wiadomosc wraz z ostatnim znanym statusem urzadzenia.
 
 **controller_sqlite_client.py**:
-
-
 Plik zawiera klase **"ControllerSqlite"** ktorej metody skupiaja sie wylacznie na zarzadzaniu baza danych punktow
 swietlnych. Pozwalaja one na dodawanie, modyfikowanie oraz usuwanie wpisow. Poadto znajduja sie tu metody pozwalajace
 na stworzenie i usuniecie tabli zawierajacej. Usuwanie tabeli jest szybsze i zajmuje mniej kodu niz tworzenie petli 

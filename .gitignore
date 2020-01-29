@@ -1,5 +1,4 @@
-/venv
-.gitignore
+/venvv
 .idea
 __pycache__/
 lightbulbs.sqlite3

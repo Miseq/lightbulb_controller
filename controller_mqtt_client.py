@@ -12,6 +12,7 @@ class ControllerMQTT(mqtt.Client):
         self.sql_client.create_table_if_dosent_exists('lightbulbs')
         self.log = log
 
+
     def on_log(self, client, userdata, level, buf):
         if self.log:
             with open("controller_logs.txt", 'a') as f:
@@ -36,19 +37,18 @@ class ControllerMQTT(mqtt.Client):
         m_decode = str(msg.payload.decode("utf-8", "ignore"))
 
         if topic == 'active':
-            # if m_decode not in self.connected_lightbulbs_list:
-            print(f"Nowe urzadzenie wykryte, ID: {m_decode}")
             self.connected_lightbulbs_list.append(m_decode)
-            new_topic_name = f"status-{m_decode}"
-            print(f"Subskrybowanie {new_topic_name}")
-            self.subscribe(new_topic_name)
+            self.subscribe(f"status-{m_decode}")
             self.sql_client.add_lightbulb(m_decode, '?')
+            print(f"Nowe urzadzenie wykryte, ID: {m_decode} "
+                  f"\nSubskrybowanie: status - {m_decode}")
 
         elif 'status-' in topic:
-            lighbulb_id = topic[7:]  # recznie usuwam 'status-', .strip moglby prowadzic do bugu gdyby id == 'status_'
+            lighbulb_id = topic[7:]
             if m_decode == 'ON' or m_decode == 'OFF':
                 self.sql_client.change_status_lightbulb(m_decode, lighbulb_id)
-                print(f"Status urzadzenia {lighbulb_id} zaktualizowany! Nowy status: {m_decode}")
+                print(f"Status urzadzenia {lighbulb_id} "
+                      f"zaktualizowany! Nowy status: {m_decode}")
 
         elif topic == 'nonactive':
             last_status = self.sql_client.select_lightbulbs(f"where {self.sql_client.id_col_name} = '{m_decode}'")
@@ -60,7 +60,7 @@ class ControllerMQTT(mqtt.Client):
 
     def delete_lightbulb_from_db(self, lb_id):
         if lb_id not in self.connected_lightbulbs_list:
-            print("Nie rozpoznano ID urzadzenia!")
+            print(f"Nie rozpoznano ID urzadzenia!")
             return None
         self.sql_client.delete_lightbulb(lb_id)
 
@@ -72,15 +72,14 @@ class ControllerMQTT(mqtt.Client):
             if condition in self.connected_lightbulbs_list:
                 condition = f" where {self.sql_client.id_col_name} = '{condition}'"
             else:
-                print("Nie wykryto punktu swietlnego o podanym id!")
+                print(f"Nie wykryto punktu swietlnego o podanym id!")
                 return None
 
-        print(self.sql_client.select_lightbulbs(condition))
+        return self.sql_client.select_lightbulbs(condition)
 
     def change_lightbulbs_status(self, new_status, id=None):
         if id:
             self.publish(f"command-{id}", new_status, retain=True)
         else:
             self.publish("command-all", new_status, retain=True)
-        self.sql_client.change_status_lightbulb(new_status, id)
-        print("Poprawnie opublikowano status!")
+        print(f"Poprawnie opublikowano status!")

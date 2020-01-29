@@ -6,8 +6,13 @@ from lightbulbs.lightbulb import LightBulb
 
 
 def print_menu():
-    print("Interfejs punktu swietlnego: \n1-Wyswietl status \n2-Wlacz swiatlo \n3-Wylacz swiatlo "
-          "\n4-Odnow polaczenie \n5-Wyswietl ponownie menu \n0-Rozlacz i zakoncz dzialanie programu")
+    print("Interfejs punktu swietlnego: "
+          "\n1-Wyswietl status "
+          "\n2-Wlacz swiatlo "
+          "\n3-Wylacz swiatlo "
+          "\n4-Odnow polaczenie "
+          "\n5-Wyswietl ponownie menu "
+          "\n6-Rozlacz i zakoncz dzialanie programu")
 
 
 def show_user_interface(client):
@@ -15,7 +20,7 @@ def show_user_interface(client):
     while True:
         user_input = input("- ").lower()
         if user_input == '1':
-            print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
+            print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.status}")
         elif user_input == '2':
             client.change_status('ON')
         elif user_input == '3':
@@ -35,7 +40,7 @@ def manage_arguments():
     parser = argparse.ArgumentParser('Konfiguracja klienta punktu swietlnego')
     # parser.add_help ???
     parser.add_argument('-id', dest='id', help='Unikatowe ID clienta', required=True)
-    parser.add_argument('-broker', dest='broker', default='localhost',
+    parser.add_argument('-broker', dest='broker', default='broker.hivemq.com',
                         help='Opcjonalny adres brokera, domyslnie localhost', required=False)
     parser.add_argument('-status', dest='status', default='OFF',
                         help='Stan poczatkowy punktu swietlnego: ON/OFF', required=False)
@@ -51,7 +56,7 @@ def main():
     client.connect_to_broker()
     client.loop_start()
     time.sleep(0.5)  # czas na poprawne pobranie i wyslanie wiadomosci
-    print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.show_current_status()}")
+    print(f"Lightb {client.id}\nConnected: {client.is_connected()}\n{client.status}")
     show_user_interface(client)
 
     client.loop_stop()

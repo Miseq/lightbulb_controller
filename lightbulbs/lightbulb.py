@@ -21,7 +21,7 @@ class LightBulb(mqtt.Client):
     @status.setter
     def status(self, new_status):
         if new_status != 'ON' and new_status != 'OFF':
-            raise ValueError("Niepoprawny status! Poprawne wartosci to 'ON' lub 'OFF'")
+            raise ValueError(f"Niepoprawny status! Poprawne wartosci to 'ON' lub 'OFF'")
         self._status = new_status
 
     def on_log(self, client, userdata, level, buf):
@@ -32,9 +32,6 @@ class LightBulb(mqtt.Client):
                 f.write(f"\n{time_stamp} LOG: {buf}")
         else:
             pass
-
-    def show_current_status(self):
-        return f"Status:{self.status}"
 
     def change_status(self, new_status):
         self.status = new_status
@@ -49,7 +46,6 @@ class LightBulb(mqtt.Client):
         topic = msg.topic
         m_decode = str(msg.payload.decode("utf-8", "ignore"))
         print(f"\nOtrzymano wiadomosc na temat: {topic}")
-        print(topic)
         if topic == f"command-{client.id}" or topic == "command-all":
             if m_decode == "ON":
                 self.change_status('ON')
@@ -68,6 +64,6 @@ class LightBulb(mqtt.Client):
     def connect_to_broker(self):
         print(f"Polaczono z brokerem: {self.broker}")
         try:
-            self.connect(self.broker)
+            self.connect('broker.hivemq.com')
         except:
             print(f"Nie udalo sie nawiazac polaczenia z brokerem: {self.broker}")
