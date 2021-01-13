@@ -4,14 +4,13 @@ from controller_sqlite_client import ControllerSqlite
 
 
 class ControllerMQTT(mqtt.Client):
-    def __init__(self, controller_name, database_name,  log):
+    def __init__(self, controller_name, database_name, log):
         super(ControllerMQTT, self).__init__(controller_name)
         self.connected_lightbulbs_list = []
         self.sql_client = ControllerSqlite(f"{database_name}.sqlite3")
         self.sql_client.connect_to_database()
         self.sql_client.create_table_if_dosent_exists('lightbulbs')
         self.log = log
-
 
     def on_log(self, client, userdata, level, buf):
         if self.log:

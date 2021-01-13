@@ -1,6 +1,7 @@
 import time
 import unittest
 import sys
+
 sys.path.append('../')
 from lightbulbs.lightbulb import LightBulb
 

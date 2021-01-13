@@ -9,7 +9,7 @@ Na projekt sklada sie 5 czesci:
 - baza danych SQLite dla punktow swietlnych
 
 ## Schemat dzialania
-![Schemat dzialania](./schemat.png)
+![Schemat dzialania](schemat_komunikacji.png)
 
 ## Instalacja
 Do poprawnego dzialania aplikacji nalezy zainstalowac wszystkie moduly znajduje sie w pliku requirements.txt
@@ -39,7 +39,7 @@ zapytania
 
 ## Dzialanie - interfejsy
 Dzialania mozna wykonywaz zarowno poprzez interfejs(kontroler/urzadzenie) jak i poprzez wysylanie zapytan REST z aplikacji
-trzecich(tylko kontroler)
+trzecich (tylko kontroler)
 
 **Kontroler:**
 

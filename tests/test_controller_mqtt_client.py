@@ -1,6 +1,7 @@
 import time
 import unittest
 import sys
+
 sys.path.append('../')
 from controller_mqtt_client import ControllerMQTT
 
@@ -33,7 +34,7 @@ class TestControllerMQTT(unittest.TestCase):
         self.test_controller.connect('localhost')
         self.test_controller.loop_start()
         self.test_controller.subscribe('nonactive')
-        self.test_controller.publish('nonactive', 'TEST',)
+        self.test_controller.publish('nonactive', 'TEST', )
         time.sleep(0.5)
         self.test_controller.loop_stop()
         output = self.test_controller.sql_client.select_lightbulbs("")

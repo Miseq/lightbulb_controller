@@ -1,4 +1,3 @@
-/venvv
 .idea
 __pycache__/
 lightbulbs.sqlite3
@@ -7,3 +6,4 @@ lightbulbs.sqlite3
 controller_logs.txt
 /lightbulbs/logs
 lightbulbs.sqlite3-journal
+venv

@@ -1,8 +1,11 @@
 import argparse
 import sys
 import time
+
 sys.path.append('../')
-from lightbulbs.lightbulb import LightBulb
+# from lightbulb import LightBulb
+from lightbulbs.lightbulb import LightBulb # moze wymagac poprawy, zaleznie od sposobu uruchamiania
+# jesli uruchamiamy przez IDE (PyCharm - zostawic bez zmian) jesli konosolowo z folderu nalezy zminic
 
 
 def print_menu():

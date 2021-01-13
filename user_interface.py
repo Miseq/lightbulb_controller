@@ -56,6 +56,7 @@ def turn_lightbubs_off_menu(url, port):
     elif detailed_command == '3':
         return None
 
+
 def delete_menu(url, port):
     detailed_command = input("\t1 - Usun wszystkie urzadzenia z bazy danych"
                              "\n\t2 - Usun wybrane urzadzenie z bazy danych"
@@ -67,6 +68,7 @@ def delete_menu(url, port):
         print(requests.delete(f'{url}:{port}/api/lightbulbs/{delete_id}').text)
     elif detailed_command == '3':
         return None
+
 
 def show_interface(url, port):
     print_basic_menu()
@@ -95,7 +97,7 @@ def show_interface(url, port):
             break
 
         else:
-            print("Nie rozpoznano polecenia!")
+            print("Nie rozpoznano polecenia")
 
 
 def manage_arguments():

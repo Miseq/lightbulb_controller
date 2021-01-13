@@ -55,7 +55,6 @@ class LightBulb(mqtt.Client):
             print(f"\nWiadomosc: {m_decode}")
 
     def on_connect(self, client, userdata, flags, rc):
-        print(f"Subskrybowane tematy: 'command-{self.id}' oraz 'command-all'")
         self.subscribe(f"command-{self.id}")
         self.subscribe("command-all")
         self.publish("active", self.id, retain=True)
@@ -63,6 +62,7 @@ class LightBulb(mqtt.Client):
 
     def connect_to_broker(self):
         print(f"Polaczono z brokerem: {self.broker}")
+        print(f"Subskrybowane tematy: 'command-{self.id}' oraz 'command-all'")
         try:
             self.connect('broker.hivemq.com')
         except:

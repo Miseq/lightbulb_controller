@@ -1,5 +1,6 @@
 import unittest
 import sys
+
 sys.path.append('../')
 from controller_sqlite_client import ControllerSqlite
 
@@ -36,7 +37,7 @@ class TestControllerSqlite(unittest.TestCase):
         self.sql_test.change_status_lightbulb('OFF', 'TEST')
         output = self.sql_test.select_lightbulbs(expression="")
         assert output[0][0] == 'TEST' and output[0][1] == 'OFF'
-    
+
     def test_select_lightbulbs(self):
         self.sql_test.connect_to_database()
         self.sql_test.create_table_if_dosent_exists('test_sql')

@@ -17,7 +17,7 @@ class ControllerSqlite:
             self.cursor = self.sqlite_connection.cursor()
             return f"Baza danych: {self.database_name} zostala stworzona i poprawnie polaczona z SQLite"
         except sqlite3.Error as error:
-            return f"Napotkano problem przy polaczeniu z baza danych: {error}"
+            return f"Napotkano problem przy probie polaczenia z baza danych: {error}"
 
     def create_table_if_dosent_exists(self, table_name):
         try:

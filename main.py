@@ -5,15 +5,15 @@ from flask import request
 from flask.views import MethodView
 
 app = Flask(__name__)
-controller = ControllerMQTT("Zbyszek", 'lightbulbs', True)
+controller = ControllerMQTT("Krzysiek", 'lightbulbs', True)
 
 
-class AllLighbutlbs(MethodView):  
+class AllLighbutlbs(MethodView):
     @staticmethod
     def get():
         output = controller.show_lightbulbs("")
         return make_response(jsonify(output), 200)
-   
+
     @staticmethod
     def post():
         data = request.get_json()
@@ -22,7 +22,7 @@ class AllLighbutlbs(MethodView):
         time.sleep(0.5)
         output = controller.show_lightbulbs("")
         return make_response(jsonify(output), 200)
-    
+
     @staticmethod
     def delete():
         controller.sql_client.delete_table()
@@ -52,7 +52,7 @@ class SingleLightbulb(MethodView):
             return make_response(jsonify(output), 200)
         except TypeError:
             return make_response(jsonify("Nie znaleziono urzadzenia o takim lightbulb_id"), 404)
-        
+
     @staticmethod
     def post(lightbulb_id):
         try:
@@ -64,7 +64,7 @@ class SingleLightbulb(MethodView):
             return make_response(jsonify(output), 200)
         except TypeError:
             return make_response(jsonify("Nie znaleziono urzadzenia o takim lightbulb_id"), 404)
-    
+
     @staticmethod
     def delete(lightbulb_id):
         try:
@@ -74,11 +74,11 @@ class SingleLightbulb(MethodView):
             return make_response(jsonify("Nie znaleziono urzadzenia o takim lightbulb_id"), 404)
 
 
-class Conection(MethodView): 
+class Conection(MethodView):
     @staticmethod
     def get():
         return make_response(jsonify(controller.is_connected()), 200)
-    
+
     @staticmethod
     def delete():
         controller.disconnect()
