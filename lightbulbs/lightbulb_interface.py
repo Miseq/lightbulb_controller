@@ -3,8 +3,8 @@ import sys
 import time
 
 sys.path.append('../')
-# from lightbulb import LightBulb
-from lightbulbs.lightbulb import LightBulb # moze wymagac poprawy, zaleznie od sposobu uruchamiania
+from lightbulb import LightBulb
+#from lightbulbs.lightbulb import LightBulb # moze wymagac poprawy, zaleznie od sposobu uruchamiania
 # jesli uruchamiamy przez IDE (PyCharm - zostawic bez zmian) jesli konosolowo z folderu nalezy zminic
 
 
